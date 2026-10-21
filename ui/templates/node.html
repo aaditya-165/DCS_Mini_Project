@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head" data-node-page="{{ node_name }}">
+  <div>
+    <p class="eyebrow" id="node-page-role">Current role: checking</p>
+    <h1 id="node-page-title">{{ "Host A" if node_name == "primary" else "Host B" }}</h1>
+  </div>
+  <div class="actions">
+    <button data-action="start" data-node="{{ node_name }}">Start</button>
+    <button data-action="restart" data-node="{{ node_name }}" class="secondary">Restart</button>
+    <button data-action="stop" data-node="{{ node_name }}" class="danger">Stop</button>
+    <a class="button-link secondary" href="/dashboard">Dashboard</a>
+  </div>
+</section>
+
+<section class="grid node-grid">
+  <article class="node-card large" id="node-{{ node_name }}">
+    <div class="node-title">Process</div>
+    <div class="role">DOWN</div>
+    <div class="meta"></div>
+  </article>
+  <article>
+    <div class="panel-title">
+      <h2>Storage</h2>
+      <span id="mirror-state" class="subtle">Local files</span>
+    </div>
+    <ul id="files-{{ node_name }}" class="file-list"></ul>
+  </article>
+</section>
+
+<section>
+  <article class="events-panel">
+    <div class="panel-title">
+      <h2>Live Events</h2>
+      <div class="event-filters" id="event-filters"></div>
+      <button id="clear-events" class="small ghost">Clear</button>
+    </div>
+    <ol id="events" class="events"></ol>
+  </article>
+</section>
+{% endblock %}

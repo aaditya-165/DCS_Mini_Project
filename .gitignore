@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Debug / test artifacts
+*.txt
+!requirements.txt
+pri_out.txt
+bak_out.txt
+primary_out.txt
+backup_out.txt
+primary_err.txt
+
+# Storage directories (created at runtime)
+test_storage_*/
+dbg_*/
+debug_pri*/
+storage_*/
+ui_storage_*/
+
+# PDFs (course materials, not code)
+*.pdf
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo

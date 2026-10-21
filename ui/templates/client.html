@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Request console</p>
+    <h1>Client</h1>
+  </div>
+  <div class="actions">
+    <button data-cluster-action="start-cluster">Start Cluster</button>
+    <button data-action="stop" data-node="primary" class="danger">Crash Primary</button>
+    <a class="button-link secondary" href="/dashboard">Dashboard</a>
+  </div>
+</section>
+
+<section class="grid client-grid">
+  <article>
+    <div class="panel-title">
+      <h2>Operation</h2>
+      <span id="client-health" class="subtle">Checking cluster</span>
+    </div>
+    <label>Operation
+      <select id="operation-select">
+        <option value="write">WRITE</option>
+        <option value="update">UPDATE</option>
+        <option value="read">READ</option>
+        <option value="delete">DELETE</option>
+      </select>
+    </label>
+    <label>Path
+      <input id="client-path" value="demo.txt" autocomplete="off">
+    </label>
+    <label id="content-field">Content
+      <textarea id="client-content" rows="9">Hello from the web UI</textarea>
+    </label>
+    <div class="actions left">
+      <button id="confirm-operation">Confirm Operation</button>
+    </div>
+    <pre id="client-result" class="result">No request sent.</pre>
+  </article>
+
+  <article>
+    <h2>Cluster Snapshot</h2>
+    <div class="mini-nodes">
+      <div id="node-primary" class="mini-node">
+        <span>Host A</span>
+        <strong class="role">DOWN</strong>
+        <small class="meta"></small>
+      </div>
+      <div id="node-backup" class="mini-node">
+        <span>Host B</span>
+        <strong class="role">DOWN</strong>
+        <small class="meta"></small>
+      </div>
+    </div>
+    <h2 class="spaced">Live Events</h2>
+    <div class="event-filters" id="event-filters"></div>
+    <ol id="events" class="events compact-events"></ol>
+  </article>
+</section>
+{% endblock %}

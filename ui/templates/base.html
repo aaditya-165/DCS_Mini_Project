@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>pyDFS Demo</title>
+  <link rel="stylesheet" href="{{ url_for('static', path='styles.css') }}?v=37">
+  <script>
+    (function() {
+      const saved = localStorage.getItem("theme");
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (saved === "dark" || (!saved && prefersDark)) {
+        document.documentElement.dataset.theme = "dark";
+      }
+    })();
+  </script>
+</head>
+<body data-page="{{ page }}">
+  <div class="noise-overlay" aria-hidden="true"></div>
+  <header class="topbar">
+    <a class="brand" href="/dashboard">
+      <span class="brand-mark">DFS</span>
+      <span>pyDFS Demo</span>
+    </a>
+    <nav>
+      <a href="/dashboard" class="{{ 'active' if page == 'dashboard' else '' }}">Dashboard</a>
+      <a href="/node/primary">Host A</a>
+      <a href="/node/backup">Host B</a>
+      <a href="/client" class="{{ 'active' if page == 'client' else '' }}">Client</a>
+    </nav>
+    <div class="topbar-actions">
+      <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme" title="Toggle theme (T)">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <div class="shortcut-hint" title="Keyboard shortcuts: S=start cluster, X=stop cluster, C=crash primary, R=recover, T=toggle theme">?</div>
+    </div>
+  </header>
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <div id="toast-container" class="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+  <div id="file-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="file-modal-title" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel">
+      <div class="modal-header">
+        <h3 id="file-modal-title">File</h3>
+        <button class="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <pre id="file-modal-content"></pre>
+      </div>
+    </div>
+  </div>
+
+  <div id="shortcuts-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="shortcuts-title" hidden>
+    <div class="modal-backdrop"></div>
+    <div class="modal-panel modal-small">
+      <div class="modal-header">
+        <h3 id="shortcuts-title">Keyboard shortcuts</h3>
+        <button class="modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <dl class="shortcut-list">
+          <div><dt>S</dt><dd>Start cluster</dd></div>
+          <div><dt>X</dt><dd>Stop cluster</dd></div>
+          <div><dt>C</dt><dd>Crash primary</dd></div>
+          <div><dt>R</dt><dd>Recover failed host</dd></div>
+          <div><dt>T</dt><dd>Toggle theme</dd></div>
+          <div><dt>?</dt><dd>Show shortcuts</dd></div>
+          <div><dt>Esc</dt><dd>Close modal / clear events</dd></div>
+        </dl>
+      </div>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', path='app.js') }}?v=37"></script>
+</body>
+</html>

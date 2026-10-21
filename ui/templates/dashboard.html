@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Live distributed file system</p>
+    <h1>pyDFS cluster monitor</h1>
+  </div>
+  <div class="actions">
+    <button data-cluster-action="start-cluster">Start Cluster</button>
+    <button id="crash-primary" class="danger">Crash Primary</button>
+    <button id="recover-failed" class="secondary">Recover Failed Host</button>
+    <button data-cluster-action="stop-cluster" class="secondary">Stop Cluster</button>
+    <button id="reset-demo" class="ghost">Reset Storage</button>
+  </div>
+</section>
+
+<section class="metrics">
+  <article>
+    <span>Host A role</span>
+    <strong id="metric-primary">DOWN</strong>
+  </article>
+  <article>
+    <span>Host B role</span>
+    <strong id="metric-backup">DOWN</strong>
+  </article>
+  <article>
+    <span>Total files</span>
+    <strong id="metric-files">0</strong>
+  </article>
+  <article>
+    <span>Last event</span>
+    <strong id="metric-event">None</strong>
+  </article>
+</section>
+
+<section class="topology topology-triangle" aria-label="Cluster topology">
+  <div class="topology-label">
+    <span>route map</span>
+    <strong id="client-health">No primary available</strong>
+  </div>
+  <svg class="triangle-links" viewBox="0 0 1000 540" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <marker id="arrow-muted" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z"></path>
+      </marker>
+      <marker id="arrow-active" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z"></path>
+      </marker>
+      <filter id="glow-active" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="5" result="blur"/>
+        <feMerge>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="blur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    <line class="route-line client-link route-a" x1="480" y1="170" x2="270" y2="320"></line>
+    <line class="route-line failover-route route-b" x1="520" y1="170" x2="730" y2="320"></line>
+    <line class="route-line repl-link repl-forward route-repl" x1="315" y1="360" x2="685" y2="360"></line>
+    <line class="route-line repl-link repl-reverse route-repl" x1="685" y1="360" x2="315" y2="360"></line>
+
+    <!-- Data-flow particles -->
+    <g class="particle-group" id="particle-group-client-a" opacity="0">
+      <circle r="3.5" filter="url(#glow-active)">
+        <animateMotion dur="1.2s" repeatCount="indefinite" path="M480,170 L270,320"/>
+      </circle>
+      <circle r="3.5" filter="url(#glow-active)">
+        <animateMotion dur="1.2s" begin="0.6s" repeatCount="indefinite" path="M480,170 L270,320"/>
+      </circle>
+    </g>
+    <g class="particle-group" id="particle-group-client-b" opacity="0">
+      <circle r="3.5" filter="url(#glow-active)">
+        <animateMotion dur="1.2s" repeatCount="indefinite" path="M520,170 L730,320"/>
+      </circle>
+      <circle r="3.5" filter="url(#glow-active)">
+        <animateMotion dur="1.2s" begin="0.6s" repeatCount="indefinite" path="M520,170 L730,320"/>
+      </circle>
+    </g>
+    <g class="particle-group" id="particle-group-repl-fwd" opacity="0">
+      <circle r="2.8" filter="url(#glow-active)">
+        <animateMotion dur="0.9s" repeatCount="indefinite" path="M315,360 L685,360"/>
+      </circle>
+      <circle r="2.8" filter="url(#glow-active)">
+        <animateMotion dur="0.9s" begin="0.45s" repeatCount="indefinite" path="M315,360 L685,360"/>
+      </circle>
+    </g>
+    <g class="particle-group" id="particle-group-repl-rev" opacity="0">
+      <circle r="2.8" filter="url(#glow-active)">
+        <animateMotion dur="0.9s" repeatCount="indefinite" path="M685,360 L315,360"/>
+      </circle>
+      <circle r="2.8" filter="url(#glow-active)">
+        <animateMotion dur="0.9s" begin="0.45s" repeatCount="indefinite" path="M685,360 L315,360"/>
+      </circle>
+    </g>
+  </svg>
+
+  <div class="route-badge badge-a" id="route-label-a">client to Host A</div>
+  <div class="route-badge badge-b" id="route-label-b">standby failover to Host B</div>
+  <div class="route-badge badge-repl" id="route-label-repl">replication + ACK</div>
+
+  <article class="client-card topology-node client-top" id="client-node">
+    <div class="node-title">Client</div>
+    <div class="role neutral">READY</div>
+    <div class="meta">Failover order<br>Host A then Host B</div>
+    <a class="node-link" href="/client">Open client tab</a>
+  </article>
+
+  <article class="node-card topology-node host-a" id="node-primary">
+    <div class="node-title">Host A</div>
+    <div class="role">DOWN</div>
+    <div class="meta"></div>
+    <div class="node-actions">
+      <button data-action="start" data-node="primary" class="small">Start</button>
+      <button data-action="stop" data-node="primary" class="small danger">Stop</button>
+    </div>
+  </article>
+
+  <article class="node-card topology-node host-b" id="node-backup">
+    <div class="node-title">Host B</div>
+    <div class="role">DOWN</div>
+    <div class="meta"></div>
+    <div class="node-actions">
+      <button data-action="start" data-node="backup" class="small">Start</button>
+      <button data-action="stop" data-node="backup" class="small danger">Stop</button>
+    </div>
+  </article>
+</section>
+
+<section class="grid dashboard-grid">
+  <article>
+    <div class="panel-title">
+      <h2>Client Operation</h2>
+      <a href="/client">Full client</a>
+    </div>
+    <label>Operation
+      <select id="operation-select">
+        <option value="write">WRITE</option>
+        <option value="update">UPDATE</option>
+        <option value="read">READ</option>
+        <option value="delete">DELETE</option>
+      </select>
+    </label>
+    <label>Path
+      <input id="client-path" value="demo.txt" autocomplete="off">
+    </label>
+    <label id="content-field">Content
+      <textarea id="client-content" rows="5">Hello from the web UI</textarea>
+    </label>
+    <div class="actions left">
+      <button id="confirm-operation">Confirm Operation</button>
+    </div>
+    <pre id="client-result" class="result">No request sent.</pre>
+  </article>
+
+  <article>
+    <div class="panel-title">
+      <h2>Storage Mirrors</h2>
+      <span id="mirror-state" class="subtle">Waiting for nodes</span>
+    </div>
+    <div class="storage-grid">
+      <div>
+        <h3>Host A</h3>
+        <ul id="files-primary" class="file-list"></ul>
+      </div>
+      <div>
+        <h3>Host B</h3>
+        <ul id="files-backup" class="file-list"></ul>
+      </div>
+    </div>
+  </article>
+
+  <article class="events-panel">
+    <div class="panel-title">
+      <h2>Live Events</h2>
+      <div class="event-filters" id="event-filters"></div>
+      <button id="clear-events" class="small ghost">Clear</button>
+    </div>
+    <ol id="events" class="events"></ol>
+  </article>
+</section>
+{% endblock %}
